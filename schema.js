@@ -15,7 +15,7 @@ const schema = new mongoose.Schema ({
         required:true
     }
 });
-schema.index({ email: 1 }, { unique: true })
+ schema.index({ email: 1 }, { unique: true })
 const User = mongoose.model("userData", schema);
 
 export default User;

@@ -2,27 +2,37 @@ import express from 'express';
 import mongoose from "mongoose"
 import UserData from './schema.js';
 import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-const mongoUrl = "mongodb://localhost:27017/resumeData";
+const mongoUrl = process.env.MONGO_URL;
 await mongoose.connect(mongoUrl)
   .then(() => {
     console.log("Connected")
   })
 
+  app.get('/showData', async (req,res) => {
+    try{
+      const show = await UserData.find();
+    res.status(201).json(show);
+    }catch(err){
+      res.status(500).json(err);
+    }
+  })
+
 app.post('/signup', async (req, res) => {
-  const data = req.body;
   try {
     const userData = new UserData(req.body);
     const saveData = await userData.save();
     res.status(201).json({ message: "Signup successful", data: saveData });
 
   } catch (err) {
-
     if (err.code === 11000) {
       return res.status(400).json({
         message: "Email already exists"
