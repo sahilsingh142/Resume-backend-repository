@@ -47,11 +47,7 @@ app.post('/login', async (req, res) => {
   try{
     const matchLogin = await UserData.findOne({ email, password });
 
-   if (!matchLogin) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    if (matchLogin.password !== password) {
+  if (!matchLogin) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
@@ -61,9 +57,11 @@ app.post('/login', async (req, res) => {
     userName: matchLogin.userName
   }
   const token = generateToken (payload);
+  console.log(token);
   res.status(200).json({matchLogin:matchLogin,token:token});
   }
   catch(err){
+    console.log(err);
     return res.status(500).json({err})
   }
 });
