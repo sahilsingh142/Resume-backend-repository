@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT;
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -17,15 +19,7 @@ await mongoose.connect(mongoUrl)
     console.log("Connected")
   })
 
-  app.get('/showData', async (req,res) => {
-    try{
-      const show = await UserData.find();
-    res.status(201).json(show);
-    }catch(err){
-      res.status(500).json(err);
-    }
-  })
-
+  {/*Sign Up */}
 app.post('/signup', async (req, res) => {
   try {
     const userData = new UserData(req.body);
@@ -45,6 +39,7 @@ app.post('/signup', async (req, res) => {
   }
 })
 
+{/*Login*/}
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -58,4 +53,4 @@ app.post('/login', async (req, res) => {
 });
 
 
-app.listen(3500);
+app.listen(PORT);
