@@ -3,6 +3,7 @@ import mongoose from "mongoose"
 import UserData from './schema.js';
 import cors from "cors";
 import dotenv from "dotenv";
+import { jwtAutherMiddleware, generateToken } from './Jwt/jwt.js';
 
 dotenv.config();
 
@@ -43,12 +44,27 @@ app.post('/signup', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const matchLogin = await UserData.findOne({ email, password });
+  try{
+    const matchLogin = await UserData.findOne({ email, password });
 
-  if (matchLogin) {
-    res.json({ message: "Login successful" });
-  } else {
-    res.json({ message: "Invalid email or password" });
+   if (!matchLogin) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    if (matchLogin.password !== password) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+  {/*When any one can sign up than give jwt Token*/}
+  const payload = {
+    id: matchLogin.id,
+    userName: matchLogin.userName
+  }
+  const token = generateToken (payload);
+  res.status(200).json({matchLogin:matchLogin,token:token});
+  }
+  catch(err){
+    return res.status(500).json({err})
   }
 });
 
