@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const schema = new mongoose.Schema ({
+const authSchema = new mongoose.Schema ({
     name:{
         type:String,
         required:true,
@@ -15,7 +15,7 @@ const schema = new mongoose.Schema ({
         required:true
     }
 });
- schema.index({ email: 1 }, { unique: true })
-const User = mongoose.model("userData", schema);
+authSchema.index({ email: 1 }, { unique: true })
+const User = mongoose.model("userData", authSchema);
 
 export default User;
