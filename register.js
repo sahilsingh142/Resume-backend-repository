@@ -1,14 +1,17 @@
-import express from 'express';
-import mongoose from "mongoose"
-import UserData from './Schema/authschema.js';
+import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import { jwtAutherMiddleware, generateToken } from './Jwt/jwt.js';
-import resumeSchema from './Schema/resumeSchema.js';
-import { pdfGenerator } from './pdfGenerator.js'
+
+import UserData from "./schema_temp/authschema.js";
+import Resume from "./schema_temp/resuSchema.js";
+
+import { jwtAutherMiddleware, generateToken } from "./Jwt/jwt.js";
+import modernTemp from "./templates/modernTemplate.js";
+import classicTemp from "./templates/classicTemplate.js";
+import professionalTemp from "./templates/professionalTemplate.js";
 
 dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT;
 
@@ -70,26 +73,47 @@ app.post('/login', async (req, res) => {
 //Save Resume Data
 app.post('/resumeData', async (req, res) => {
   try {
-    const body = new resumeSchema(req.body);
-    const saveData = await body.save();
-    res.status(201).json({ message: "Successful", data: saveData });
+    const resume = new Resume(req.body);
+    const saveData = await resume.save();
+
+    res.status(201).json({
+      message: "Successful",
+      data: saveData
+    });
+
   } catch (err) {
-    res.status(401).json({ message: "Invalid any thing" });
+    console.error(err);
+    res.status(500).json({
+      message: "Something went wrong",
+      error: err.message
+    });
   }
+});
 
-})
-
-app.get('/doanload/:id', async (req, res) => {
+app.get('/download/:id/:template', async (req, res) => {
   try {
-    const getData = req.params.id;
-    const resume = new resumeSchema.findById(getData);
-    if(!resume){
-     return res.status(404).json({ message: "Resume not found" });
+    const { id, template } = req.params;
+    const resume = await Resume.findById(id);
+    if (!resume) {
+      return res.status(404).json({ message: "Resume not found" });
+    }
+    const alltemplates = {
+      modern: modernTemp,
+      classic: classicTemp,
+      professional: professionalTemp,
+    };
+    console.log(template);
+    const selectedTemplate = alltemplates[template];
+    console.log(selectedTemplate);
+
+    if (!selectedTemplate) {
+      return res.status(400).json({ message: "Invalid template name" });
     }
 
-    pdfGenerator(resume,res);
+    selectedTemplate(resume, res)
+
   } catch (err) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ err: err.message });
   }
 })
 
